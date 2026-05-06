@@ -2,81 +2,47 @@
 
 class DBcontroller
 {
-    public $dbHost="localhost";
-    public $dbUser="root";
-    public $dbName="eco-tourism";   
-    public $dbPassword;
-    public $connection;
+    private static $instance = null;
+    private $connection;
+
+    private $dbHost = "localhost";
+    private $dbUser = "root";
+    private $password = "";
+    // Write database name here
+    private $dbname = "eco-tourism";
+
+
+    // Private constructor → prevent direct creation
+    private function __construct()
+    {
+        $this->connection = new mysqli(
+            $this->dbHost,
+            $this->dbUser,
+            $this->password,
+            $this->dbname
+        );
+
+        if ($this->connection->connect_error) {
+            die("Database Connection Failed: " . $this->connection->connect_error);
+        }
+
+        // Important for Arabic or UTF8 text
+        $this->connection->set_charset("utf8");
+    }
+
+    // Singleton static method → returns same instance always
+    public static function getInstance()
+    {
+        if (self::$instance === null) {
+            self::$instance = new DBcontroller();
+        }
+        return self::$instance;
+    }
+
+    // Getter for mysqli connection
+    public function getConnection()
+    {
+        return $this->connection;
+    }
   
-     public function openConnection()
-    {
-        $this->connection=new mysqli($this->dbHost,$this->dbUser,$this->dbPassword,$this->dbName);
-        if($this->connection->connect_error)
-        {
-            echo " Error in Connection : ".$this->connection->connect_error;
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
-
-    public function closeConnection()
-    {
-        if($this->connection)
-        {
-            $this->connection->close();
-        }
-        else
-        {
-            echo "Connection is not opened";
-        }
-    }
-
-    public function select($qry)
-    {
-        $result=$this->connection->query($qry);
-        if(!$result)
-        {
-            echo "Error : ".mysqli_error($this->connection);
-            return false;
-        }
-        else
-        {
-             return $result->fetch_all(MYSQLI_ASSOC);
-        }
-
-    }
-    public function insert($qry)
-    {
-        $result=$this->connection->query($qry);
-        if(!$result)
-        {
-            echo "Error : ".mysqli_error($this->connection);
-            return false;
-        }
-        else
-        {
-             return $this->connection->insert_id;
-        }
-
-    }
-    public function delete($qry)
-    {
-        $result=$this->connection->query($qry);
-        if(!$result)
-        {
-            echo "Error : ".mysqli_error($this->connection);
-            return false;
-        }
-        else
-        {
-             return $result;
-        }
-
-    }
-
 }
-
-?>

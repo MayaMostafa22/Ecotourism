@@ -1,60 +1,77 @@
 <?php
-
+require_once __DIR__ . '/../controllers/DBcontroller.php';
 class User
 {
-    private $UserID;
-    private $UserName;
-    private $UserRole;
-    private $Email;
-    private $Password;
- public function __construct($userName, $email, $password, $userRole)
+    private $db;
+
+    public function __construct()
     {
-        $this->setUserName($userName);
-        $this->setEmail($email);
-        $this->setPassword($password);
-        $this->UserRole = $userRole;
-    }
-    public function getUserID()
-    {
-        return $this->UserID;
+
+        // Use the Singleton
+        $this->db = DBcontroller::getInstance()->getConnection();
     }
 
-    public function getUserName()
+    /* CREATE USER */
+    public function createUser($name, $email, $password, $role)
     {
-        return $this->UserName;
+        $sql = "INSERT INTO users (UserName, Email, Password, UserRole) VALUES (?, ?, ?, ?)";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("ssss", $name, $email, $password, $role);
+
+        return $stmt->execute();
     }
 
-    public function setUserName($UserName)
+    /* GET ONE USER */
+    public function getUserById($id)
     {
-        $this->UserName = $UserName;
-    }
-    
-    public function getUserRole()
-    {
-        return $this->UserRole;
+        $sql = "SELECT * FROM users WHERE UserID = ?";
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+
+        return $stmt->get_result()->fetch_assoc();
     }
 
-    public function setUserRole($UserRole)
+    /* GET ALL USERS */
+    public function getAllUsers()
     {
-        $this->UserRole = $UserRole;
-    }
-    
-    public function getEmail()
-    {
-        return $this->Email;
+        $sql = "SELECT * FROM users ORDER BY UserID DESC";
+        $result = $this->db->query($sql);
+
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
-    public function setEmail($Email)
+    /* LOGIN SUPPORT */
+    public function findByEmail($email)
     {
-        $this->Email = $Email;
-    }
-    public function getPassword()
-    {
-        return $this->Password;
+        $sql = "SELECT * FROM users WHERE Email = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("s", $email);
+
+        $stmt->execute();
+        return $stmt->get_result()->fetch_assoc();
     }
 
-    public function setPassword($Password)
+    /* UPDATE USER */
+    public function updateUser($id, $name, $email, $role)
     {
-        $this->Password = $Password;
+        $sql = "UPDATE users 
+            SET UserName = ?, Email = ?, UserRole = ?
+            WHERE UserID = ?";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("sssi", $name, $email, $role, $id);
+
+        return $stmt->execute();
+    }
+
+    /* DELETE USER */
+    public function deleteUser($id)
+    {
+        $sql = "DELETE FROM users WHERE UserID = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("i", $id);
+        return $stmt->execute();
     }
 }
