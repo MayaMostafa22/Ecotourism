@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../controllers/DBcontroller.php';
-
+//bmooooooot
 class GuideLanguage
 {
     private $db;
