@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../controllers/DBcontroller.php';
-//ya gma3aaaa
+
 class BookingEscrow
 {
     protected $db;
