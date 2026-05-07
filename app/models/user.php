@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../controllers/DBcontroller.php';
 class User
 {
-    private $db;
+    protected $db;
 
     public function __construct()
     {
