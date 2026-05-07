@@ -1,41 +1,37 @@
 <?php
 require_once __DIR__ . '/../controllers/DBcontroller.php';
+//require_once 'User.php';
+require_once __DIR__ . '/User.php';
 
-class Guide
+class Guid extends User
 {
-    private $db;
-
-    public function __construct()
-    {
-        // Use the Singleton
-        $this->db = DBcontroller::getInstance()->getConnection();
-    }
 
     /* CREATE GUIDE */
     public function createGuide(
-        $identityId, 
-        $localCredScore, 
-        $yearsOfExperience, 
-        $isVerified, 
-        $baseCountry, 
-        $status, 
-        $yearsOfResidency, 
-        $cancellationRate, 
+        $identityId,
+        $localCredScore,
+        $yearsOfExperience,
+        $isVerified,
+        $baseCountry,
+        $status,
+        $yearsOfResidency,
+        $cancellationRate,
         $visibilityScore
     ) {
         $sql = "INSERT INTO guides (IdentityID, localCredScore, yearsOfExperience, isVerified, baseCountry, status, yearsOfResidency, CancellationRate, VisibilityScore) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->db->prepare($sql);
-        
+
         // i: integer, s: string
-        $stmt->bind_param("iiiissiii", 
-            $identityId, 
-            $localCredScore, 
-            $yearsOfExperience, 
-            $isVerified, 
-            $baseCountry, 
-            $status, 
-            $yearsOfResidency, 
-            $cancellationRate, 
+        $stmt->bind_param(
+            "iiiissiii",
+            $identityId,
+            $localCredScore,
+            $yearsOfExperience,
+            $isVerified,
+            $baseCountry,
+            $status,
+            $yearsOfResidency,
+            $cancellationRate,
             $visibilityScore
         );
 
@@ -65,15 +61,15 @@ class Guide
 
     /* UPDATE GUIDE */
     public function updateGuide(
-        $id, 
-        $identityId, 
-        $localCredScore, 
-        $yearsOfExperience, 
-        $isVerified, 
-        $baseCountry, 
-        $status, 
-        $yearsOfResidency, 
-        $cancellationRate, 
+        $id,
+        $identityId,
+        $localCredScore,
+        $yearsOfExperience,
+        $isVerified,
+        $baseCountry,
+        $status,
+        $yearsOfResidency,
+        $cancellationRate,
         $visibilityScore
     ) {
         $sql = "UPDATE guides 
@@ -81,17 +77,18 @@ class Guide
             WHERE GuideID = ?";
 
         $stmt = $this->db->prepare($sql);
-        
-        $stmt->bind_param("iiiiissiii", 
-            $identityId, 
-            $localCredScore, 
-            $yearsOfExperience, 
-            $isVerified, 
-            $baseCountry, 
-            $status, 
-            $yearsOfResidency, 
-            $cancellationRate, 
-            $visibilityScore, 
+
+        $stmt->bind_param(
+            "iiiiissiii",
+            $identityId,
+            $localCredScore,
+            $yearsOfExperience,
+            $isVerified,
+            $baseCountry,
+            $status,
+            $yearsOfResidency,
+            $cancellationRate,
+            $visibilityScore,
             $id
         );
 
@@ -103,9 +100,9 @@ class Guide
     {
         $sql = "DELETE FROM guides WHERE GuideID = ?";
         $stmt = $this->db->prepare($sql);
-        
+
         $stmt->bind_param("i", $id);
-        
+
         return $stmt->execute();
     }
 }
