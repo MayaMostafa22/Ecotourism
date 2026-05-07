@@ -7,18 +7,18 @@ class Language
 
     public function __construct()
     {
-        // Use the Singleton
+
         $this->db = DBcontroller::getInstance()->getConnection();
     }
 
     /* CREATE LANGUAGE */
     public function createLanguage($langName)
     {
-        
+
         $sql = "INSERT INTO languages (LangName) VALUES (?)";
         $stmt = $this->db->prepare($sql);
-        
-       
+
+
         $stmt->bind_param("s", $langName);
 
         return $stmt->execute();
@@ -51,7 +51,7 @@ class Language
         $sql = "UPDATE languages SET LangName = ? WHERE LangID = ?";
         $stmt = $this->db->prepare($sql);
 
-       
+
         $stmt->bind_param("si", $langName, $id);
 
         return $stmt->execute();
