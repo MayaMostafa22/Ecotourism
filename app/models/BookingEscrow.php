@@ -3,7 +3,7 @@ require_once __DIR__ . '/../controllers/DBcontroller.php';
 
 class BookingEscrow
 {
-    protected $db;
+    private $db;
 
     public function __construct()
     {
