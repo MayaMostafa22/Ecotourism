@@ -13,14 +13,14 @@ class Payment
     /* CREATE PAYMENT */
     public function createPayment($bookingId, $amount, $currency, $exchangeRate)
     {
-        // الداتا بيز هتسجل الـ PaymentDate تلقائياً 
+       
         $sql = "INSERT INTO payment (BookingId, Amount, Currency, ExchangeRate) 
                 VALUES (?, ?, ?, ?)";
         
         $stmt = $this->db->prepare($sql);
         
         // i (BookingId), d (Amount), s (Currency), d (ExchangeRate) -> idsd
-        // استخدمنا d (Double) مع الأرقام عشان لو حبيت تخليها كسور مستقبلاً
+        
         $stmt->bind_param("idsd", $bookingId, $amount, $currency, $exchangeRate);
 
         return $stmt->execute();
