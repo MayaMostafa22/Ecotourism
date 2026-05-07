@@ -50,10 +50,27 @@ class BookingOffsetProject
                 WHERE ProjectID = ? AND BookingID = ?";
         
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("dii", $newAmount, $projectID, $bookingID);
+        $stmt->bind_param("dii", $projectID, $bookingID, $newAmount);
 
         return $stmt->execute();
     }
+
+public function getFullOffsetDetails($bookingID)
+{
+    $sql = "SELECT 
+                bop.offsetAmounts, 
+                p.ProjectName, 
+                p.Description
+            FROM booking_offset_projects bop
+            JOIN carbon_offset_projects p ON bop.ProjectID = p.ProjectID
+            WHERE bop.BookingID = ?";
+
+    $stmt = $this->db->prepare($sql);
+    $stmt->bind_param("i", $bookingID);
+    $stmt->execute();
+
+    return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+}
 
     /* DELETE: */
     public function deleteBookingOffset($projectID, $bookingID)
