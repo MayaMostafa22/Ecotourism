@@ -3,13 +3,6 @@ require_once __DIR__ . '/User.php';
 
 class Admin extends User
 {
-    protected $db;
-
-    public function __construct()
-    {
-        $this->db = DBcontroller::getInstance()->getConnection();
-    }
-
     /* CREATE ADMIN */
     public function createAdmin($adminType, $userID)
     {
