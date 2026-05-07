@@ -7,7 +7,7 @@ class Admin extends User
     /* CREATE ADMIN */
     public function createAdmin($adminType, $userID)
     {
-        $sql = "INSERT INTO admin (AdminType, CreatedAt, AdminID) VALUES (?, NOW(), ?)";
+        $sql = "INSERT INTO admin (AdminType, CreatedAt) VALUES (?, NOW())";
         $stmt = $this->db->prepare($sql);
         $stmt->bind_param("si", $adminType, $userID);
 
