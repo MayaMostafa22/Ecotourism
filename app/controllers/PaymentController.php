@@ -11,12 +11,9 @@ class PaymentController
         }
     }
 
-    /**
-     * 1. Process payment matching the SQL schema
-     */
+    
     public function processPayment($bookingID, $amount, $currency, $exchangeRate)
     {
-        // Security check
         if (!isset($_SESSION["UserID"]) || $_SESSION["UserRole"] !== 'Traveler') {
             $_SESSION["errMsg"] = "Unauthorized access. Please login.";
             return false;
@@ -31,14 +28,11 @@ class PaymentController
             return false;
         }
 
-        // Logic: Check if the amount (after considering exchange rate if needed) is correct
-        // For simplicity, we assume 'amount' passed is what will be stored.
         if ($booking['Status'] === 'Confirmed') {
             $_SESSION["errMsg"] = "This booking is already paid.";
             return false;
         }
 
-        // Validate Currency enum values matching your SQL: '$Dollar' or 'EGP'
         $allowedCurrencies = ['$Dollar', 'EGP'];
         if (!in_array($currency, $allowedCurrencies)) {
             $_SESSION["errMsg"] = "Invalid currency selected.";
@@ -46,8 +40,6 @@ class PaymentController
         }
 
         $paymentModel = new Payment();
-        // Matching your table columns: BookingId, Amount, Currency, ExchangeRate
-        // Note: PaymentDate is handled by current_timestamp() in MySQL
         $isPaymentRecorded = $paymentModel->createPayment(
             $bookingID, 
             $amount, 
@@ -56,7 +48,6 @@ class PaymentController
         );
 
         if ($isPaymentRecorded) {
-            // Update booking status to Confirmed
             $isBookingUpdated = $bookingModel->updateStatus($bookingID, 'Confirmed');
 
             if ($isBookingUpdated) {
@@ -72,9 +63,6 @@ class PaymentController
         return false;
     }
 
-    /**
-     * 2. Get payment history for current user
-     */
     public function getMyPaymentHistory()
     {
         if (!isset($_SESSION["UserID"])) return [];
@@ -94,7 +82,6 @@ class PaymentController
 
         $myPayments = [];
         foreach ($allPayments as $payment) {
-            // Match column name 'BookingId' from your SQL
             if (in_array($payment['BookingId'], $userBookingIDs)) {
                 $myPayments[] = $payment;
             }
