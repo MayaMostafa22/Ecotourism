@@ -31,6 +31,23 @@ class LocationStops
 
         return $stmt->get_result()->fetch_assoc();
     }
+    /* GET STOPS BY EXPERIENCE ID */
+    public function getStopsByExperience($expID)
+    {
+        $sql = "SELECT 
+                    ls.*, 
+                    l.LocationName 
+                FROM locationstops ls
+                JOIN location l ON ls.LocationID = l.LocationID
+                WHERE ls.ExpID = ?
+                ORDER BY ls.LocationID ASC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("i", $expID);
+        $stmt->execute();
+
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
 
     /* GET ALL LOCATION STOPS */
     public function getAllLocationStops()
