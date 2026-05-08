@@ -7,7 +7,6 @@ class Auth
         $_SESSION['user'] = [
             'id'    => $user['id'],
             'name'  => $user['name'],
-            'age'  => $user['age'],
             'email' => $user['email'],
             'role'  => $user['role']
         ];
