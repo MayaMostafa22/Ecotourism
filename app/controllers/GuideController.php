@@ -2,7 +2,7 @@
 require_once "../app/helpers/Validator.php";
 require_once "../app/helpers/Auth.php";
 
-// استدعاء الموديلات المحددة
+
 require_once "../app/models/Guid.php";
 require_once "../app/models/GuideIdentity.php";
 require_once "../app/models/GuideSchedule.php";
@@ -24,7 +24,7 @@ class GuideController extends Controller
         Auth::redirectIfNotLogged();
         Auth::forbidIfNotRole("guide");
 
-        // الربط مع الموديلات
+      
         $this->guideModel    = new Guid();
         $this->identityModel = new GuideIdentity();
         $this->scheduleModel = new GuideSchedule();
@@ -38,7 +38,7 @@ class GuideController extends Controller
     {
         $langId = $_POST['lang_id'];
         $guideId = Auth::user()->id;
-        // تحديث حالة اللغة لـ "انتظار المراجعة" أو "موثقة"
+     
         $this->langModel->updateVerificationStatus($guideId, $langId, 1);
        // header("Location: " . BASE_URL . "Guide/profile");
     }
@@ -56,14 +56,7 @@ class GuideController extends Controller
         echo "Local Credibility Score updated to: " . $score;
     }
 
-    // // 14. Dynamic Multilingual Content Sync
-    // public function syncContentTranslation($expId)
-    // {
-    //     // إذا قام المرشد بتعديل وصف الرحلة، نضع "Flag" للمترجمين أو لباقي اللغات
-    //     $this->guideModel->setTranslationNeeded($expId, true);
-    //     echo "Translation-needed flag triggered.";
-    // }
-
+    
     // 15. Guide Availability Conflict Resolver
     public function checkScheduleConflict($requestedDate)
     {
