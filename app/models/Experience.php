@@ -66,4 +66,26 @@ class Experience
         
         return $stmt->execute();
     }
+    /*by yasmiiin */
+
+
+public function getPendingExperiences()
+{
+    $sql = "SELECT * FROM experiences WHERE Status = 'Pending' ORDER BY CreatedAt DESC";
+    $result = $this->db->query($sql);
+
+    if ($result) {
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+    return [];
+}
+
+public function updateStatus($id, $status)
+{
+    $sql = "UPDATE experiences SET Status = ? WHERE ExperienceID = ?";
+    $stmt = $this->db->prepare($sql);
+    $stmt->bind_param("si", $status, $id);
+
+    return $stmt->execute();
+}
 }

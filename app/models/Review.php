@@ -76,4 +76,32 @@ class Review
         
         return $stmt->execute();
     }
+    /*by yasmiiin*/
+
+
+    public function getFlaggedReviews()
+    {
+
+        $sql = "SELECT r.*, u.UserName, e.Title as ExperienceTitle 
+                FROM reviews r
+                JOIN users u ON r.UserID = u.UserID
+                JOIN experiences e ON r.ExperienceID = e.ExperienceID
+                WHERE r.IsFlagged = 1 
+                ORDER BY r.CreatedAt DESC";
+        
+        $result = $this->db->query($sql);
+        
+        if ($result) {
+            return $result->fetch_all(MYSQLI_ASSOC);
+        }
+        return [];
+    }
+
+    public function unflagReview($id)
+    {
+        $sql = "UPDATE reviews SET IsFlagged = 0 WHERE ReviewID = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("i", $id);
+        return $stmt->execute();
+    }
 }

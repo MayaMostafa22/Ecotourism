@@ -62,4 +62,17 @@ class AuditLog
         $stmt->bind_param("i", $id);
         return $stmt->execute();
     }
+   
+
+    public function logAction($adminId, $action, $details)
+    {
+        $sql = "INSERT INTO audit_logs (AdminID, Action, Details) VALUES (?, ?, ?)";
+        $stmt = $this->db->prepare($sql);
+        
+        $stmt->bind_param("iss", $adminId, $action, $details);
+
+        return $stmt->execute();
+    }
+
+   
 }
