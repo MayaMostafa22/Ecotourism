@@ -57,6 +57,15 @@ class Experience
         
         return $stmt->execute();
     }
+    
+    public function updateExperienceRating($id, $ecoRating)
+    {
+    $sql = "UPDATE experience SET EcoLeafRating = ? WHERE ExperienceID = ?";
+    $stmt = $this->db->prepare($sql);
+    $stmt->bind_param("ii", $ecoRating, $id);
+    
+    return $stmt->execute();
+    }
 
     public function deleteExperience($id)
     {

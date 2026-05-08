@@ -1,8 +1,4 @@
 <?php
-require_once "../app/helpers/Validator.php";
-require_once "../app/helpers/Auth.php";
-
-
 require_once "../app/models/Guid.php";
 require_once "../app/models/GuideIdentity.php";
 require_once "../app/models/GuideSchedule.php";
@@ -10,7 +6,7 @@ require_once "../app/models/GuideLanguage.php";
 require_once "../app/models/GuideWallet.php";
 require_once "../app/models/FieldReports.php";
 
-class GuideController extends Controller
+class GuideController
 {
     private $guideModel;
     private $identityModel;
@@ -21,124 +17,184 @@ class GuideController extends Controller
 
     public function __construct()
     {
-        Auth::redirectIfNotLogged();
-        Auth::forbidIfNotRole("guide");
+        // بدء الجلسة للتعامل مع الرسائل والـ User ID بنفس طريقة الـ PaymentController
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
-      
+        // Security check يدوي داخل الـ constructor
+        if (!isset($_SESSION["UserID"]) || $_SESSION["UserRole"] !== 'guide') {
+            header("Location: /login");
+            exit();
+        }
+
         $this->guideModel    = new Guid();
         $this->identityModel = new GuideIdentity();
         $this->scheduleModel = new GuideSchedule();
         $this->langModel     = new GuideLanguage();
         $this->walletModel   = new GuideWallet();
-        $this->FieldReports   = new FieldReports();
+        $this->FieldReports  = new FieldReports();
     }
 
-    // 12. Language Proficiency Verification
-    public function verifyLanguage()
+    /**
+     * 12. Language Proficiency Verification
+     */
+    public function verifyLanguage($langId)
     {
-        $langId = $_POST['lang_id'];
-        $guideId = Auth::user()->id;
-     
-        $this->langModel->updateVerificationStatus($guideId, $langId, 1);
-       // header("Location: " . BASE_URL . "Guide/profile");
+        $guideId = $_SESSION["UserID"];
+        
+        $isUpdated = $this->langModel->updateVerificationStatus($guideId, $langId, 1);
+
+        if ($isUpdated) {
+            $_SESSION["successMsg"] = "Language skills verified successfully.";
+            return true;
+        } else {
+            $_SESSION["errMsg"] = "Failed to verify language proficiency.";
+            return false;
+        }
     }
 
-    // 13. Guide "Local Cred" Algorithm
+    /**
+     * 13. Guide "Local Cred" Algorithm
+     */
     public function updateLocalCred()
     {
-        $guideId = Auth::user()->id;
+        $guideId = $_SESSION["UserID"];
         $guideData = $this->guideModel->getGuideById($guideId);
         
-        // الخوارزمية: (سنوات الإقامة * 10) + (عدد الرحلات المحلية * 2)
+        if (!$guideData) {
+            $_SESSION["errMsg"] = "Guide data not found.";
+            return false;
+        }
+
+        // الخوارزمية: (سنوات الإقامة * 10) + 5 نقاط أساسية
         $score = ($guideData['yearsOfResidency'] * 10) + 5; 
         
-        $this->guideModel->updateLocalCredScore($guideId, $score);
-        echo "Local Credibility Score updated to: " . $score;
+        $isUpdated = $this->guideModel->updateLocalCredScore($guideId, $score);
+
+        if ($isUpdated) {
+            $_SESSION["successMsg"] = "Local Credibility Score updated: $score";
+            return $score;
+        }
+        return false;
     }
 
-    
-    // 15. Guide Availability Conflict Resolver
+    /**
+     * 15. Guide Availability Conflict Resolver
+     */
     public function checkScheduleConflict($requestedDate)
     {
-        $guideId = Auth::user()->id;
+        $guideId = $_SESSION["UserID"];
         $existingSchedules = $this->scheduleModel->getSchedulesByGuide($guideId);
         
         foreach ($existingSchedules as $schedule) {
             if ($schedule['date'] == $requestedDate) {
-                return "Conflict Detected: You are already booked on this date!";
+                $_SESSION["errMsg"] = "Conflict: You are already booked on $requestedDate.";
+                return true; // يوجد تعارض
             }
         }
-        return "Available";
+        return false; // متاح
     }
 
-    // 18. Mobile "In-Field" Profile Updater
-    
-    public function storeFieldReport()
+    /**
+     * 18. Mobile "In-Field" Profile Updater
+     */
+    public function storeFieldReport($tourId, $reportContent)
     {
-        $guideId = Auth::user()->id; //
-        $reportContent = $_POST['report_text']; //
-        $tourId = $_POST['tour_id']; //
+        $guideId = $_SESSION["UserID"];
+        $mediaURL = ""; // يتم استلامها من الـ Upload logic إذا وجد
 
-        // 1. لازم نبعت قيمة للميديا (حتى لو فاضية) لأن الموديل مستني 4 حاجات
-        $mediaURL = "";
+        if (empty($reportContent)) {
+            $_SESSION["errMsg"] = "Report content cannot be empty.";
+            return false;
+        }
 
-        // 2. استخدام نفس الاسم اللي عرفتيه في الـ constructor وهو $this->FieldReports
-        // 3. ترتيب البيانات لازم يطابق الموديل: URL ثم Text ثم GuideID ثم ExpID
-        $this->FieldReports->createFieldReport($mediaURL, $reportContent, $guideId, $tourId);
+        $isSaved = $this->FieldReports->createFieldReport($mediaURL, $reportContent, $guideId, $tourId);
 
-        //header("Location: " . BASE_URL . "Guide/dashboard"); //
+        if ($isSaved) {
+            $_SESSION["successMsg"] = "Field report posted successfully!";
+            return true;
+        }
+        return false;
     }
-    // 19. Guide Revenue Split Logic
+
+    /**
+     * 19. Guide Revenue Split Logic
+     */
     public function getRevenueDetails($experiencePrice)
     {
-        $platformFee = 0.15; // 15% عمولة الموقع
-        $communityTax = 0.05; // 5% ضرائب مجتمع محلي
+        $platformFee = 0.15; 
+        $communityTax = 0.05; 
         
         $netAmount = $experiencePrice * (1 - ($platformFee + $communityTax));
         
         return [
             'total' => $experiencePrice,
-            'fee' => $experiencePrice * $platformFee,
-            'tax' => $experiencePrice * $communityTax,
-            'net' => $netAmount
+            'fee'   => $experiencePrice * $platformFee,
+            'tax'   => $experiencePrice * $communityTax,
+            'net'   => $netAmount
         ];
     }
 
-    // 20. Withdrawal Request Processor
-    public function withdrawFunds()
+    /**
+     * 20. Withdrawal Request Processor
+     */
+    public function withdrawFunds($amount)
     {
-        $guideId = Auth::user()->id;
-        $amount = $_POST['amount'];
+        $guideId = $_SESSION["UserID"];
         $wallet = $this->walletModel->getWalletByGuideId($guideId);
 
-        if ($wallet['AvailableBalance'] >= $amount) {
-            // عملية سحب الأموال
-            $newBalance = $wallet['AvailableBalance'] - $amount;
-            $this->walletModel->updateBalances($guideId, $newBalance, $wallet['PendingBalance']);
-            echo "Withdrawal successful!";
-        } else {
-            echo "Insufficient balance.";
+        if (!$wallet || $wallet['AvailableBalance'] < $amount) {
+            $_SESSION["errMsg"] = "Insufficient balance for withdrawal.";
+            return false;
         }
+
+        $newBalance = $wallet['AvailableBalance'] - $amount;
+        $isProcessed = $this->walletModel->updateBalances($guideId, $newBalance, $wallet['PendingBalance']);
+
+        if ($isProcessed) {
+            $_SESSION["successMsg"] = "Withdrawal request of $amount processed.";
+            return true;
+        }
+        return false;
     }
 
-    // 21. Performance-Based Visibility Boost
+    /**
+     * 21. Performance-Based Visibility Boost
+     */
     public function boostVisibility()
     {
-        $guideId = Auth::user()->id;
+        $guideId = $_SESSION["UserID"];
         $guide = $this->guideModel->getGuideById($guideId);
         
-        // خوارزمية الظهور: تعتمد على تقييم الاستدامة ونسبة الإلغاء
-        $boostScore = ($guide['SustainabilityScore'] * 0.8) - ($guide['CancellationRate'] * 0.2);
-        
-        $this->guideModel->updateVisibilityScore($guideId, $boostScore);
+        if ($guide) {
+            // الخوارزمية حسب جدولك: Sustainability Score و Cancellation Rate
+            $boostScore = ($guide['SustainabilityScore'] * 0.8) - ($guide['CancellationRate'] * 0.2);
+            $this->guideModel->updateVisibilityScore($guideId, $boostScore);
+            return $boostScore;
+        }
+        return false;
     }
 
-    // 22. Biometric Identity Verification Simulation
+    /**
+     * 22. Biometric Identity Verification Simulation
+     */
     public function verifyBiometric()
     {
-        $identityId = Auth::user()->IdentityID;
-        // محاكاة التحقق الحيوي لتفعيل الحساب
-        $this->identityModel->verifyIdentity($identityId);
-        echo "Biometric check passed. Identity status updated to Active.";
+        // استخدام IdentityID من الجلسة (نفترض أنه تم تخزينه عند تسجيل الدخول)
+        $identityId = $_SESSION["IdentityID"] ?? null;
+
+        if (!$identityId) {
+            $_SESSION["errMsg"] = "Identity ID not found in session.";
+            return false;
+        }
+
+        $isVerified = $this->identityModel->verifyIdentity($identityId);
+
+        if ($isVerified) {
+            $_SESSION["successMsg"] = "Biometric check passed. Identity is now Active.";
+            return true;
+        }
+        return false;
     }
 }
