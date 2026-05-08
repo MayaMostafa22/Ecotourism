@@ -5,12 +5,11 @@ require_once __DIR__ . '/User.php';
 class Admin extends User
 {
     /* CREATE ADMIN */
-    public function createAdmin($adminType, $userID)
+     public function createAdmin($adminType, $userID)
     {
-        $sql = "INSERT INTO admin (AdminType, CreatedAt) VALUES (?, NOW())";
+        $sql  = "INSERT INTO admin (AdminID, AdminType, CreatedAt) VALUES (?, ?, NOW())";
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("si", $adminType, $userID);
-
+        $stmt->bind_param("is", $userID, $adminType);
         return $stmt->execute();
     }
 
@@ -45,13 +44,5 @@ class Admin extends User
         return $stmt->execute();
     }
 
-    /* DELETE ADMIN */
-    public function deleteAdmin($id)
-    {
-        $sql = "DELETE FROM admin WHERE AdminID = ?";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("i", $id);
-
-        return $stmt->execute();
-    }
+   
 }
