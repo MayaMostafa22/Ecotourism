@@ -1,7 +1,7 @@
 <?php
 require_once '../../models/Booking.php';
 require_once '../../models/Experience.php'; 
-require_once '../../models/Cancellation.php'; // 1. Added the Cancellation model here
+require_once '../../models/Cancellation.php';
 
 class BookingController
 {
@@ -84,7 +84,7 @@ class BookingController
         return $myBookings;
     }
 
-    /* 4. Cancel booking (Cancellation Model integrated here) */
+    /* 4. Cancel booking with Dynamic Refund Policy */
     public function cancelBooking($bookingID, $reason)
     {
         // 1. Check permissions
@@ -107,10 +107,37 @@ class BookingController
             return false;
         }
 
-        // 3. Application Logic: Calculate cancellation fees and refund percentage
-        // (Example: Deduct 20% cancellation fee and refund 80% of the final price)
-        $refundedPercentage = 80.00;
-        $cancellationFee = ($booking['FinalPrice'] * 20) / 100;
+        // 3. Dynamic Application Logic: Calculate Refund based on Experience StartTime
+        $experienceModel = new Experience();
+        // Assuming the column name in booking table is 'ExpID'
+        $experienceData = $experienceModel->getExperienceById($booking['ExpID']); 
+        
+        if (!$experienceData) {
+            $_SESSION["errMsg"] = "Error retrieving experience details for cancellation.";
+            return false;
+        }
+
+        // Convert dates to timestamps for math
+        $tripDate = strtotime($experienceData['StartTime']);
+        $today = time(); 
+
+        // Calculate difference in days
+        $daysDifference = ($tripDate - $today) / (60 * 60 * 24);
+
+        // Apply Refund Policy
+        if ($daysDifference >= 7) {
+            // Cancelled 7 or more days before trip: 100% Refund
+            $refundedPercentage = 100.00;
+            $cancellationFee = 0.00;
+        } elseif ($daysDifference >= 3) {
+            // Cancelled 3 to 6 days before trip: 80% Refund, 20% Fee
+            $refundedPercentage = 80.00;
+            $cancellationFee = ($booking['FinalPrice'] * 20) / 100;
+        } else {
+            // Cancelled less than 3 days before (or already passed): 0% Refund, 100% Fee
+            $refundedPercentage = 0.00;
+            $cancellationFee = $booking['FinalPrice'];
+        }
 
         // 4. Change the primary booking status to Cancelled
         $isStatusUpdated = $bookingModel->updateStatus($bookingID, 'Cancelled');
@@ -126,10 +153,9 @@ class BookingController
             );
 
             if ($isRecordCreated) {
-                $_SESSION["successMsg"] = "Booking cancelled successfully and refund data recorded.";
+                $_SESSION["successMsg"] = "Booking cancelled successfully. Refund percentage: {$refundedPercentage}%";
                 return true;
             } else {
-                // If there's an issue with the cancellation table but the booking was cancelled
                 $_SESSION["errMsg"] = "Cancelled, but an error occurred while recording the refund invoice.";
                 return false;
             }
