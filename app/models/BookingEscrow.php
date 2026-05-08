@@ -19,6 +19,13 @@ class BookingEscrow
         $stmt->bind_param("isdss", $bookingId, $status, $amountHeld, $entryDate, $releasedDate);
         return $stmt->execute();
     }
+    /* GET ALL ESCROWS */
+    public function getAllEscrows()
+    {
+        $sql = "SELECT * FROM bookingescrow ORDER BY EscrowId DESC";
+        $result = $this->db->query($sql);
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
 
     /* GET ONE ESCROW */
     public function getEscrowById($id)
