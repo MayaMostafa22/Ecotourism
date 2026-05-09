@@ -1,13 +1,9 @@
 <?php
-require_once __DIR__ . '/../core/Controller.php'; 
-require_once __DIR__ . '/../core/Auth.php';      
-require_once __DIR__ . '/../core/Validator.php';  
-
 require_once __DIR__ . '/../models/Review.php';
 require_once __DIR__ . '/../models/Complaint.php';
 require_once __DIR__ . '/../models/SentimentFlag.php';
 
-class EngagementController extends Controller
+class EngagementController
 {
     private $reviewModel;
     private $complaintModel;
@@ -15,6 +11,10 @@ class EngagementController extends Controller
 
     public function __construct()
     {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         $this->reviewModel = new Review();
         $this->complaintModel = new Complaint();
         $this->sentimentFlagModel = new SentimentFlag();
@@ -22,149 +22,149 @@ class EngagementController extends Controller
 
     // REVIEW MANAGEMENT
 
-    public function submitReview()
+    public function submitReview($bookingID, $rating, $culturalRespectScore, $comment, $ecoScore)
     {
-        Auth::redirectIfNotLogged();
-
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $validator = new Validator();
-
-            $bookingID = $_POST['bookingID'] ?? '';
-            $rating = $_POST['rating'] ?? '';
-            $comment = $_POST['comment'] ?? '';
-            $culturalRespectScore = $_POST['culturalRespectScore'] ?? 0;
-            $ecoScore = $_POST['ecoScore'] ?? 0;
-
-            //اValidation
-            $validator->required('bookingID', $bookingID, 'Booking ID is missing.');
-            $validator->required('rating', $rating, 'Please provide a rating.');
-            $validator->required('comment', $comment, 'Comment cannot be empty.');
-            $validator->minLength('comment', $comment, 10, 'Comment must be at least 10 characters.');
-
-            if ($validator->passes()) {
-                $travelerID = Auth::user()['id'];
-
-                $success = $this->reviewModel->createReview($bookingID, $travelerID, $rating, $culturalRespectScore, $comment, $ecoScore);
-                
-                if ($success) {
-                    return $this->view('reviews/success', ['message' => 'Review submitted successfully.']);
-                }
-            }
-
-            return $this->view('reviews/create', ['errors' => $validator->getErrors()]);
+        if (!isset($_SESSION["UserID"]) || $_SESSION["UserRole"] !== 'Traveler') {
+            $_SESSION["errMsg"] = "Unauthorized access.";
+            return false;
         }
+
+        if (empty($bookingID) || empty($rating) || empty($comment) || strlen($comment) < 10) {
+            $_SESSION["errMsg"] = "Invalid review data. Comment must be at least 10 characters.";
+            return false;
+        }
+
+        $travelerID = $_SESSION["UserID"]; 
+        $success = $this->reviewModel->createReview($bookingID, $travelerID, $rating, $culturalRespectScore, $comment, $ecoScore);
+        
+        if ($success) {
+            $_SESSION["successMsg"] = "Review submitted successfully.";
+            return true;
+        }
+        
+        $_SESSION["errMsg"] = "Failed to submit review.";
+        return false;
     }
 
     public function getReviewsForBooking($bookingID)
     {
-        $reviews = $this->reviewModel->getReviewsByBooking($bookingID);
-        return $this->view('reviews/list', ['reviews' => $reviews]);
+        return $this->reviewModel->getReviewsByBooking($bookingID);
     }
 
     public function listFlaggedReviews()
     {
-        Auth::forbidIfNotRole('admin');
+        if (!isset($_SESSION["UserRole"]) || $_SESSION["UserRole"] !== 'Admin') {
+            return [];
+        }
 
-        $flaggedReviews = $this->reviewModel->getFlaggedReviews();
-        return $this->view('admin/reviews/flagged', ['reviews' => $flaggedReviews]);
+        return $this->reviewModel->getFlaggedReviews();
     }
 
     public function approveFlaggedReview($reviewID)
     {
-        Auth::forbidIfNotRole('admin');
+        if (!isset($_SESSION["UserRole"]) || $_SESSION["UserRole"] !== 'Admin') {
+            $_SESSION["errMsg"] = "Unauthorized access.";
+            return false;
+        }
 
         $success = $this->reviewModel->unflagReview($reviewID);
         
         if ($success) {
-            return $this->view('admin/reviews/flagged', ['success' => 'Review unflagged successfully.']);
+            $_SESSION["successMsg"] = "Review unflagged successfully.";
+            return true;
         }
-        return $this->view('admin/reviews/flagged', ['error' => 'Failed to unflag review.']);
+
+        $_SESSION["errMsg"] = "Failed to unflag review.";
+        return false;
     }
 
     // COMPLAINT MANAGEMENT
+    
 
-    public function submitComplaint()
+    public function submitComplaint($bookingId, $guideId, $photosUrl, $description)
     {
-        Auth::redirectIfNotLogged();
-
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $validator = new Validator();
-
-            $bookingId = $_POST['bookingId'] ?? '';
-            $guideId = $_POST['guideId'] ?? '';
-            $description = $_POST['description'] ?? '';
-            $photosUrl = $_POST['photosUrl'] ?? ''; 
-            $adminId = NULL;
-
-            $validator->required('bookingId', $bookingId);
-            $validator->required('description', $description);
-            $validator->minLength('description', $description, 20, 'Please explain the issue in detail (min 20 chars).');
-
-            if ($validator->passes()) {
-                $travelerId = Auth::user()['id'];
-                $status = 'Pending'; 
-                $resolution = '';
-                $createdDate = date('Y-m-d H:i:s');
-                $resolvedDate = NULL;
-
-                $success = $this->complaintModel->fileComplaint($bookingId, $travelerId, $guideId, $adminId, $photosUrl, $description, $status, $resolution, $createdDate, $resolvedDate);
-
-                if ($success) {
-                    return $this->view('complaints/success', ['message' => 'Complaint filed successfully.']);
-                }
-            }
-
-            return $this->view('complaints/create', ['errors' => $validator->getErrors()]);
+        if (!isset($_SESSION["UserID"]) || $_SESSION["UserRole"] !== 'Traveler') {
+            $_SESSION["errMsg"] = "Unauthorized access.";
+            return false;
         }
+
+        if (empty($bookingId) || empty($description) || strlen($description) < 20) {
+            $_SESSION["errMsg"] = "Please explain the issue in detail (min 20 chars).";
+            return false;
+        }
+
+        $travelerId = $_SESSION["UserID"];
+        $adminId = NULL;
+        $status = 'Pending'; 
+        $resolution = '';
+        $createdDate = date('Y-m-d H:i:s');
+        $resolvedDate = NULL;
+
+        $success = $this->complaintModel->fileComplaint($bookingId, $travelerId, $guideId, $adminId, $photosUrl, $description, $status, $resolution, $createdDate, $resolvedDate);
+
+        if ($success) {
+            $_SESSION["successMsg"] = "Complaint filed successfully.";
+            return true;
+        }
+
+        $_SESSION["errMsg"] = "Failed to file complaint.";
+        return false;
     }
 
     public function getTravelerComplaints()
     {
-        Auth::redirectIfNotLogged();
-        $travelerId = Auth::user()['id']; 
-        $complaints = $this->complaintModel->getComplaintsByTraveler($travelerId);
-        
-        return $this->view('traveler/complaints_history', ['complaints' => $complaints]);
+        if (!isset($_SESSION["UserID"]) || $_SESSION["UserRole"] !== 'Traveler') {
+            return [];
+        }
+
+        $travelerId = $_SESSION["UserID"]; 
+        return $this->complaintModel->getComplaintsByTraveler($travelerId);
     }
 
-    public function processComplaintResolution()
+    public function processComplaintResolution($complaintId, $status, $resolution)
     {
-        Auth::forbidIfNotRole('admin');
-
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $complaintId = $_POST['complaintId'];
-            $status = $_POST['status'];
-            $resolution = $_POST['resolution'];
-            $adminId = Auth::user()['id']; 
-            $resolvedDate = date('Y-m-d H:i:s');
-            
-            $success = $this->complaintModel->resolveComplaint($complaintId, $adminId, $status, $resolution, $resolvedDate);
-
-            $complaints = $this->complaintModel->getAllComplaints();
-            return $this->view('admin/complaints/list', ['complaints' => $complaints, 'message' => 'Complaint resolved.']);
+        if (!isset($_SESSION["UserRole"]) || $_SESSION["UserRole"] !== 'Admin') {
+            $_SESSION["errMsg"] = "Unauthorized access.";
+            return false;
         }
+
+        $adminId = $_SESSION["UserID"];  
+        $resolvedDate = date('Y-m-d H:i:s');
+        
+        $success = $this->complaintModel->resolveComplaint($complaintId, $adminId, $status, $resolution, $resolvedDate);
+
+        if ($success) {
+            $_SESSION["successMsg"] = "Complaint resolved successfully.";
+            return true;
+        }
+
+        $_SESSION["errMsg"] = "Failed to resolve complaint.";
+        return false;
     }
 
     public function listAllComplaints()
     {
-        Auth::forbidIfNotRole('admin');
-        $complaints = $this->complaintModel->getAllComplaints();
-        return $this->view('admin/complaints/list', ['complaints' => $complaints]);
+        if (!isset($_SESSION["UserRole"]) || $_SESSION["UserRole"] !== 'Admin') {
+            return [];
+        }
+
+        return $this->complaintModel->getAllComplaints();
     }
 
     // SENTIMENT FLAG MANAGEMENT
 
     public function flagReviewSentiment($reviewID, $keywordDetected, $flagType, $severity)
     {
-        $success = $this->sentimentFlagModel->createSentimentFlag($reviewID, $keywordDetected, $flagType, $severity);
-        return $success;
+        return $this->sentimentFlagModel->createSentimentFlag($reviewID, $keywordDetected, $flagType, $severity);
     }
 
     public function listAllSentimentFlags()
     {
-        Auth::forbidIfNotRole('admin');
-        $flags = $this->sentimentFlagModel->getAllSentimentFlags();
-        return $this->view('admin/sentiment/list', ['flags' => $flags]);
+        if (!isset($_SESSION["UserRole"]) || $_SESSION["UserRole"] !== 'Admin') {
+            return [];
+        }
+
+        return $this->sentimentFlagModel->getAllSentimentFlags();
     }
 }
 ?>

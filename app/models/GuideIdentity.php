@@ -58,7 +58,6 @@ class GuideIdentity
         return $stmt->execute();
     }
     public function verifyIdentity($id) {
-        // التحديث بناءً على جدول الهوية اللي في صورتك (IdentityID, Status)
         $sql = "UPDATE guideidentity SET Status = 'Active' WHERE IdentityID = ?";
         $stmt = $this->db->prepare($sql);
         $stmt->bind_param("i", $id);
