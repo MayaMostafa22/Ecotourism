@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 02, 2026 at 06:36 PM
+-- Generation Time: May 09, 2026 at 03:00 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -29,7 +29,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `addon` (
   `AddOnID` int(11) NOT NULL,
-  `Name` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `Name` varchar(100) NOT NULL,
   `Price` decimal(10,0) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -40,7 +40,7 @@ CREATE TABLE `addon` (
 --
 
 CREATE TABLE `admin` (
-  `AdminType` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `AdminType` varchar(50) NOT NULL,
   `CreatedAt` datetime NOT NULL,
   `AdminID` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -54,11 +54,11 @@ CREATE TABLE `admin` (
 CREATE TABLE `auditlog` (
   `LogID` int(11) NOT NULL,
   `ExpID` int(11) NOT NULL,
-  `FiledType` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `FiledType` varchar(100) NOT NULL,
   `TimeStamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `AdminID` int(11) NOT NULL,
-  `OldValue` varchar(1000) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `NewValue` varchar(1000) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL
+  `OldValue` varchar(1000) NOT NULL,
+  `NewValue` varchar(1000) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -72,13 +72,13 @@ CREATE TABLE `booking` (
   `TravelerID` int(11) NOT NULL,
   `ExpID` int(11) NOT NULL,
   `BookingDate` datetime NOT NULL,
-  `Status` enum('Pending','Confirmed','Cancelled') CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `Status` enum('Pending','Confirmed','Cancelled') NOT NULL,
   `IsWaitListAccepted` tinyint(1) NOT NULL,
   `GroupSize` int(11) NOT NULL,
   `DiscountID` int(11) NOT NULL,
-  `DiscountAmount` int(11) NOT NULL,
-  `BasePrice` int(11) NOT NULL,
-  `FinalPrice` int(11) NOT NULL
+  `DiscountAmount` decimal(11,0) NOT NULL,
+  `BasePrice` decimal(11,0) NOT NULL,
+  `FinalPrice` decimal(11,0) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -129,7 +129,7 @@ CREATE TABLE `booking_offset_projects` (
 CREATE TABLE `briefingdocument` (
   `DocID` int(11) NOT NULL,
   `ExpID` int(11) NOT NULL,
-  `URL` varchar(900) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL
+  `URL` varchar(900) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -144,7 +144,7 @@ CREATE TABLE `cancellation` (
   `CancellationDate` datetime NOT NULL,
   `RefundedPercentage` decimal(10,0) NOT NULL,
   `CancellationFee` decimal(10,0) NOT NULL,
-  `ReasonOfCancellation` varchar(900) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL
+  `ReasonOfCancellation` varchar(900) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -155,8 +155,8 @@ CREATE TABLE `cancellation` (
 
 CREATE TABLE `carbon_offset_projects` (
   `ProjectID` int(11) NOT NULL,
-  `ProjectName` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `Description` varchar(1500) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `ProjectName` varchar(200) NOT NULL,
+  `Description` varchar(1500) NOT NULL,
   `CostOfCarbonUnit` decimal(10,0) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -169,7 +169,7 @@ CREATE TABLE `carbon_offset_projects` (
 CREATE TABLE `communityconsent` (
   `consentID` int(11) NOT NULL,
   `Status` enum('Approved','Refused') NOT NULL,
-  `contractURL` varchar(900) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL
+  `contractURL` varchar(900) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -184,10 +184,10 @@ CREATE TABLE `complaint` (
   `TravelerID` int(11) NOT NULL,
   `GuideID` int(11) NOT NULL,
   `AdminID` int(11) NOT NULL,
-  `PhotosURL` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `Description` varchar(1000) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `Status` enum('Resolved','Rejected') CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `Resolution` varchar(1000) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `PhotosURL` varchar(500) NOT NULL,
+  `Description` varchar(1000) NOT NULL,
+  `Status` enum('Resolved','Rejected') NOT NULL,
+  `Resolution` varchar(1000) NOT NULL,
   `CreatedDate` datetime NOT NULL,
   `ResolvedDate` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -201,7 +201,7 @@ CREATE TABLE `complaint` (
 CREATE TABLE `ecocertificate` (
   `CertificateID` int(11) NOT NULL,
   `CertificateURL` varchar(500) NOT NULL,
-  `CertificateName` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `CertificateName` varchar(500) NOT NULL,
   `GuideID` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -213,12 +213,12 @@ CREATE TABLE `ecocertificate` (
 
 CREATE TABLE `experience` (
   `ExperienceID` int(11) NOT NULL,
-  `ExperienceName` varchar(80) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `Description` varchar(700) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `ExperienceName` varchar(80) NOT NULL,
+  `Description` varchar(700) NOT NULL,
   `EcoLeafRating` decimal(10,0) NOT NULL,
-  `Status` varchar(80) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `Status` varchar(80) NOT NULL,
   `basePrice` decimal(10,0) NOT NULL,
-  `locations` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `locations` varchar(500) NOT NULL,
   `StartTime` datetime NOT NULL,
   `EndTime` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -232,7 +232,7 @@ CREATE TABLE `experience` (
 CREATE TABLE `experiencetier` (
   `TierID` int(11) NOT NULL,
   `ExpID` int(11) NOT NULL,
-  `TierName` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `TierName` varchar(100) NOT NULL,
   `MaxCapacity` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -256,8 +256,8 @@ CREATE TABLE `exp_resource` (
 
 CREATE TABLE `fieldreports` (
   `ReportID` int(11) NOT NULL,
-  `MediaURL` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `ReportText` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `MediaURL` varchar(500) NOT NULL,
+  `ReportText` varchar(500) NOT NULL,
   `TimeStamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `GuideID` int(11) NOT NULL,
   `ExpID` int(11) NOT NULL
@@ -340,7 +340,7 @@ CREATE TABLE `guidewallet` (
 
 CREATE TABLE `language` (
   `LangID` int(11) NOT NULL,
-  `LangName` int(100) NOT NULL
+  `LangName` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -352,7 +352,7 @@ CREATE TABLE `language` (
 CREATE TABLE `location` (
   `LocationID` int(11) NOT NULL,
   `coordinates` point NOT NULL,
-  `LocationName` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `LocationName` varchar(500) NOT NULL,
   `IsProtectedLand` tinyint(1) NOT NULL,
   `IsIndigenousLand` tinyint(1) NOT NULL,
   `ConsentID` int(11) NOT NULL
@@ -394,7 +394,7 @@ CREATE TABLE `payment` (
 
 CREATE TABLE `resource` (
   `ResourceID` int(11) NOT NULL,
-  `ResourceName` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `ResourceName` varchar(100) NOT NULL,
   `TotallNum` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -426,7 +426,7 @@ CREATE TABLE `review` (
   `TravelerID` int(11) NOT NULL,
   `Rating` decimal(10,0) NOT NULL,
   `CulturalRespectScore` decimal(11,0) NOT NULL,
-  `Comment` varchar(900) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `Comment` varchar(900) NOT NULL,
   `Date` datetime NOT NULL,
   `EcoScore` decimal(11,0) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -440,7 +440,7 @@ CREATE TABLE `review` (
 CREATE TABLE `seasonalrule` (
   `RuleID` int(11) NOT NULL,
   `ExpID` int(11) NOT NULL,
-  `Reason` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `Reason` varchar(500) NOT NULL,
   `ActionType` varchar(50) NOT NULL,
   `StartDate` datetime NOT NULL,
   `EndDate` datetime NOT NULL
@@ -455,9 +455,9 @@ CREATE TABLE `seasonalrule` (
 CREATE TABLE `sentimentflag` (
   `FlagID` int(11) NOT NULL,
   `ReviewID` int(11) NOT NULL,
-  `KeywordDetected` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `FlagType` enum('Environmental','Culture','Safety') CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `Severity` enum('Low','High','Medium') CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL
+  `KeywordDetected` varchar(100) NOT NULL,
+  `FlagType` enum('Environmental','Culture','Safety') NOT NULL,
+  `Severity` enum('Low','High','Medium') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -479,7 +479,7 @@ CREATE TABLE `translateddoc` (
 
 CREATE TABLE `traveler` (
   `TravelerID` int(11) NOT NULL,
-  `PreferredCurrency` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL
+  `PreferredCurrency` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -490,10 +490,11 @@ CREATE TABLE `traveler` (
 
 CREATE TABLE `users` (
   `UserID` int(11) NOT NULL,
-  `UserName` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `UserRole` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `Email` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `Password` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL
+  `UserName` varchar(100) NOT NULL,
+  `PhoneNo.` varchar(50) NOT NULL,
+  `UserRole` varchar(100) NOT NULL,
+  `Email` varchar(100) NOT NULL,
+  `Password` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -508,7 +509,7 @@ CREATE TABLE `voucher` (
   `GeneratedDate` datetime NOT NULL,
   `ScannedDate` datetime NOT NULL,
   `ExpireDate` datetime NOT NULL,
-  `QRCode` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `QRCode` varchar(500) NOT NULL,
   `BookingID` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -994,7 +995,8 @@ ALTER TABLE `booking`
 -- Constraints for table `bookingaddon`
 --
 ALTER TABLE `bookingaddon`
-  ADD CONSTRAINT `bookingaddon_ibfk_1` FOREIGN KEY (`AddOnID`) REFERENCES `addon` (`AddOnID`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `bookingaddon_ibfk_1` FOREIGN KEY (`AddOnID`) REFERENCES `addon` (`AddOnID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `bookingaddon_ibfk_2` FOREIGN KEY (`BookingID`) REFERENCES `booking` (`BookingID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `bookingescrow`
