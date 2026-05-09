@@ -108,7 +108,7 @@ class Guid extends User
     /* 13. Update Local Cred Score */
     public function updateLocalCredScore($guideId, $score)
     {
-        // بناءً على الصورة: العمود اسمه localCredScore
+   
         $sql = "UPDATE guides SET localCredScore = ? WHERE GuideID = ?";
         $stmt = $this->db->prepare($sql);
         $stmt->bind_param("ii", $score, $guideId);
@@ -118,20 +118,20 @@ class Guid extends User
     /* 21. Update Visibility Score */
     public function updateVisibilityScore($guideId, $score)
     {
-        // بناءً على الصورة: العمود اسمه VisibilityScore
+      
         $sql = "UPDATE guides SET VisibilityScore = ? WHERE GuideID = ?";
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("ii", $score, $guideId); // استخدمنا i لأن النوع في الصورة int(11)
+        $stmt->bind_param("ii", $score, $guideId); 
         return $stmt->execute();
     }
 
-    // /* دالة لجلب بيانات المرشد كاملة */
-// public function getGuideById($guideId)
-// {
-//     $sql = "SELECT * FROM guides WHERE GuideID = ?";
-//     $stmt = $this->db->prepare($sql);
-//     $stmt->bind_param("i", $guideId);
-//     $stmt->execute();
-//     return $stmt->get_result()->fetch_assoc();
-// }
+  
+public function getIdentityById($guideId)
+{
+    $sql = "SELECT * FROM guides WHERE GuideID = ?";
+    $stmt = $this->db->prepare($sql);
+    $stmt->bind_param("i", $guideId);
+    $stmt->execute();
+    return $stmt->get_result()->fetch_assoc();
+}
 }
