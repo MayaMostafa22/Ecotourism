@@ -17,23 +17,23 @@ class GuideController
 
     public function __construct()
     {
-        // بدء الجلسة للتعامل مع الرسائل والـ User ID بنفس طريقة الـ PaymentController
+
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
 
-        // Security check يدوي داخل الـ constructor
+
         if (!isset($_SESSION["UserID"]) || $_SESSION["UserRole"] !== 'guide') {
             header("Location: /login");
             exit();
         }
 
-        $this->guideModel    = new Guid();
+        $this->guideModel = new Guid();
         $this->identityModel = new GuideIdentity();
         $this->scheduleModel = new GuideSchedule();
-        $this->langModel     = new GuideLanguage();
-        $this->walletModel   = new GuideWallet();
-        $this->FieldReports  = new FieldReports();
+        $this->langModel = new GuideLanguage();
+        $this->walletModel = new GuideWallet();
+        $this->FieldReports = new FieldReports();
     }
 
     /**
@@ -42,7 +42,7 @@ class GuideController
     public function verifyLanguage($langId)
     {
         $guideId = $_SESSION["UserID"];
-        
+
         $isUpdated = $this->langModel->updateVerificationStatus($guideId, $langId, 1);
 
         if ($isUpdated) {
@@ -61,15 +61,15 @@ class GuideController
     {
         $guideId = $_SESSION["UserID"];
         $guideData = $this->guideModel->getGuideById($guideId);
-        
+
         if (!$guideData) {
             $_SESSION["errMsg"] = "Guide data not found.";
             return false;
         }
 
-        // الخوارزمية: (سنوات الإقامة * 10) + 5 نقاط أساسية
-        $score = ($guideData['yearsOfResidency'] * 10) + 5; 
-        
+        //algo:(snwat el2kama *10)+ 5 key points for each beginner guide
+        $score = ($guideData['yearsOfResidency'] * 10) + 5;
+
         $isUpdated = $this->guideModel->updateLocalCredScore($guideId, $score);
 
         if ($isUpdated) {
@@ -86,14 +86,14 @@ class GuideController
     {
         $guideId = $_SESSION["UserID"];
         $existingSchedules = $this->scheduleModel->getSchedulesByGuide($guideId);
-        
+
         foreach ($existingSchedules as $schedule) {
             if ($schedule['date'] == $requestedDate) {
                 $_SESSION["errMsg"] = "Conflict: You are already booked on $requestedDate.";
-                return true; // يوجد تعارض
+                return true;
             }
         }
-        return false; // متاح
+        return false;
     }
 
     /**
@@ -102,7 +102,7 @@ class GuideController
     public function storeFieldReport($tourId, $reportContent)
     {
         $guideId = $_SESSION["UserID"];
-        $mediaURL = ""; // يتم استلامها من الـ Upload logic إذا وجد
+        $mediaURL = "";
 
         if (empty($reportContent)) {
             $_SESSION["errMsg"] = "Report content cannot be empty.";
@@ -123,16 +123,16 @@ class GuideController
      */
     public function getRevenueDetails($experiencePrice)
     {
-        $platformFee = 0.15; 
-        $communityTax = 0.05; 
-        
+        $platformFee = 0.15;
+        $communityTax = 0.05;
+
         $netAmount = $experiencePrice * (1 - ($platformFee + $communityTax));
-        
+
         return [
             'total' => $experiencePrice,
-            'fee'   => $experiencePrice * $platformFee,
-            'tax'   => $experiencePrice * $communityTax,
-            'net'   => $netAmount
+            'fee' => $experiencePrice * $platformFee,
+            'tax' => $experiencePrice * $communityTax,
+            'net' => $netAmount
         ];
     }
 
@@ -166,9 +166,9 @@ class GuideController
     {
         $guideId = $_SESSION["UserID"];
         $guide = $this->guideModel->getGuideById($guideId);
-        
+
         if ($guide) {
-            // الخوارزمية حسب جدولك: Sustainability Score و Cancellation Rate
+
             $boostScore = ($guide['SustainabilityScore'] * 0.8) - ($guide['CancellationRate'] * 0.2);
             $this->guideModel->updateVisibilityScore($guideId, $boostScore);
             return $boostScore;
@@ -181,7 +181,7 @@ class GuideController
      */
     public function verifyBiometric()
     {
-        // استخدام IdentityID من الجلسة (نفترض أنه تم تخزينه عند تسجيل الدخول)
+
         $identityId = $_SESSION["IdentityID"] ?? null;
 
         if (!$identityId) {
