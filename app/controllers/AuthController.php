@@ -45,10 +45,14 @@ class AuthController
             $stmt->execute();
         } 
         elseif($role === "guide") {
-            $sql = "INSERT INTO guide (GuideID) VALUES (?)";
-            $stmt = $userModel->db->prepare($sql);
-            $stmt->bind_param("i", $userID);
-            $stmt->execute();
+        $sql1 = "INSERT INTO guideidentity (Status, VerificationDate) VALUES ('Active', NOW())";
+        $userModel->db->query($sql1);
+        $identityID = $userModel->db->insert_id;
+
+        $sql2 = "INSERT INTO guide (GuideID, IdentityID) VALUES (?, ?)";
+        $stmt = $userModel->db->prepare($sql2);
+        $stmt->bind_param("ii", $userID, $identityID);
+        $stmt->execute();
         }
 
         if(session_status() === PHP_SESSION_NONE) { session_start(); }
