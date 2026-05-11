@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../controllers/DBcontroller.php';
+require_once __DIR__ . '/../models/D.php';
 
 class ExpResource
 {
@@ -8,7 +8,7 @@ class ExpResource
     public function __construct()
     {
         // Use the Singleton
-        $this->db = DBcontroller::getInstance()->getConnection();
+        $this->db = DB::getInstance()->getConnection();
     }
 
     /* CREATE:*/

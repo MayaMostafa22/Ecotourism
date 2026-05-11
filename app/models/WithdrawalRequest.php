@@ -1,6 +1,5 @@
 <?php
-require_once __DIR__ . '/../controllers/DBcontroller.php';
-
+require_once __DIR__ . '/../models/DB.php';
 class WithdrawalRequest
 {
     private $db;
@@ -8,7 +7,7 @@ class WithdrawalRequest
     public function __construct()
     {
         // Use the Singleton
-        $this->db = DBcontroller::getInstance()->getConnection();
+        $this->db = DB::getInstance()->getConnection();
     }
     /* CREATE: */
     public function createRequest($amount, $status, $guideID)

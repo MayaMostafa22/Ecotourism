@@ -1,13 +1,12 @@
 <?php
-require_once __DIR__ . '/../controllers/DBcontroller.php';
-
+require_once __DIR__ . '/../models/DB.php';
 class Complaint
 {
     private $db;
 
     public function __construct()
     {
-        $this->db = DBcontroller::getInstance()->getConnection();
+        $this->db = DB::getInstance()->getConnection();
     }
 
     public function fileComplaint($bookingId, $travelerId, $guideId, $adminId, $photosUrl, $description, $status, $resolution, $createdDate, $resolvedDate)

@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../controllers/DBcontroller.php';
+require_once __DIR__ . '/../models/DB.php';
 
 class AddOn
 {
@@ -7,7 +7,7 @@ class AddOn
 
     public function __construct()
     {
-        $this->db = DBcontroller::getInstance()->getConnection();
+        $this->db = DB::getInstance()->getConnection();
     }
 
     /* CREATE ADDON */

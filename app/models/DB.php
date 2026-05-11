@@ -1,6 +1,6 @@
 <?php
 
-class DBcontroller
+class DB
 {
     private static $instance = null;
     private $connection;
@@ -34,7 +34,7 @@ class DBcontroller
     public static function getInstance()
     {
         if (self::$instance === null) {
-            self::$instance = new DBcontroller();
+            self::$instance = new DB();
         }
         return self::$instance;
     }

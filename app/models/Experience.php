@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../controllers/DBcontroller.php';
+require_once __DIR__ . '/../models/DB.php';
 
 class Experience
 {
@@ -7,7 +7,7 @@ class Experience
 
     public function __construct()
     {
-        $this->db = DBcontroller::getInstance()->getConnection();
+        $this->db = DB::getInstance()->getConnection();
     }
 
     public function createExperience($name, $desc, $ecoRating, $status, $price, $locations, $start, $end)
