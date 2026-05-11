@@ -1,5 +1,5 @@
 <?php 
-require_once '../../Models/User.php';
+require_once '../../models/User.php';
 
 class AuthController
 {
@@ -25,30 +25,44 @@ class AuthController
         return false;
     }
 
-    public function register($name, $email, $password, $role)
+  public function register($name, $email, $password, $role)
+{
+    $userModel = new User();
+    
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    $isCreated = $userModel->createUser($name, $email, $hashedPassword, $role);
+    
+    if($isCreated)
     {
-        $userModel = new User();
+        $userData = $userModel->findByEmail($email);
+        $userID = $userData["UserID"];
+
         
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        
-        $isCreated = $userModel->createUser($name, $email, $hashedPassword, $role);
-        
-        if($isCreated)
-        {
-            $userData = $userModel->findByEmail($email);
-            
-            if(session_status() === PHP_SESSION_NONE) { session_start(); }
-            $_SESSION["UserID"] = $userData["UserID"];
-            $_SESSION["UserName"] = $userData["UserName"];
-            $_SESSION["UserRole"] = $userData["UserRole"];
-            return true;
+        if($role === "traveler") {
+            $sql = "INSERT INTO traveler (TravelerID, PreferredCurrency) VALUES (?, 'USD')";
+            $stmt = $userModel->db->prepare($sql);
+            $stmt->bind_param("i", $userID);
+            $stmt->execute();
+        } 
+        elseif($role === "guide") {
+            $sql = "INSERT INTO guide (GuideID) VALUES (?)";
+            $stmt = $userModel->db->prepare($sql);
+            $stmt->bind_param("i", $userID);
+            $stmt->execute();
         }
-        else
-        {
-            if(session_status() === PHP_SESSION_NONE) { session_start(); }
-            $_SESSION["errMsg"] = "Something went wrong... try again later";
-            return false;
-        }
+
+        if(session_status() === PHP_SESSION_NONE) { session_start(); }
+        $_SESSION["UserID"] = $userData["UserID"];
+        $_SESSION["UserName"] = $userData["UserName"];
+        $_SESSION["UserRole"] = $userData["UserRole"];
+        return true;
     }
+    else
+    {
+        if(session_status() === PHP_SESSION_NONE) { session_start(); }
+        $_SESSION["errMsg"] = "Something went wrong... try again later";
+        return false;
+    }
+}
 }
 ?>

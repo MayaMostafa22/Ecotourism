@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../models/DB.php';
 class User
 {
-    protected $db;
+    public $db;
 
     public function __construct()
     {
