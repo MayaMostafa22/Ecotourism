@@ -14,7 +14,7 @@ class Language
     public function createLanguage($langName)
     {
 
-        $sql = "INSERT INTO languages (LangName) VALUES (?)";
+        $sql = "INSERT INTO language (LangName) VALUES (?)";
         $stmt = $this->db->prepare($sql);
 
 
@@ -26,7 +26,7 @@ class Language
     /* GET ONE LANGUAGE */
     public function getLanguageById($id)
     {
-        $sql = "SELECT * FROM languages WHERE LangID = ?";
+        $sql = "SELECT * FROM language WHERE LangID = ?";
         $stmt = $this->db->prepare($sql);
 
         $stmt->bind_param("i", $id);
@@ -35,10 +35,10 @@ class Language
         return $stmt->get_result()->fetch_assoc();
     }
 
-    /* GET ALL LANGUAGES */
-    public function getAllLanguages()
+    /* GET ALL language */
+    public function getAlllanguage()
     {
-        $sql = "SELECT * FROM languages ORDER BY LangID DESC";
+        $sql = "SELECT * FROM language ORDER BY LangID DESC";
         $result = $this->db->query($sql);
 
         return $result->fetch_all(MYSQLI_ASSOC);
@@ -47,7 +47,7 @@ class Language
     /* UPDATE LANGUAGE */
     public function updateLanguage($id, $langName)
     {
-        $sql = "UPDATE languages SET LangName = ? WHERE LangID = ?";
+        $sql = "UPDATE language SET LangName = ? WHERE LangID = ?";
         $stmt = $this->db->prepare($sql);
 
 
@@ -59,7 +59,7 @@ class Language
     /* DELETE LANGUAGE */
     public function deleteLanguage($id)
     {
-        $sql = "DELETE FROM languages WHERE LangID = ?";
+        $sql = "DELETE FROM language WHERE LangID = ?";
         $stmt = $this->db->prepare($sql);
 
         $stmt->bind_param("i", $id);

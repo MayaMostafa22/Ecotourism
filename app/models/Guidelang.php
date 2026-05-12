@@ -13,7 +13,7 @@ class GuideLanguage
     public function addLanguageToGuide($guideId, $langId, $proficiencyLevel, $verificationStatus = 0)
     {
 
-        $sql = "INSERT INTO guide_languages (GuideID, LangID, proficiencyLevel, VerificationStatus) VALUES (?, ?, ?, ?)";
+        $sql = "INSERT INTO guidelang (GuideID, LangID, proficiencyLevel, VerificationStatus) VALUES (?, ?, ?, ?)";
         $stmt = $this->db->prepare($sql);
         
     
@@ -26,7 +26,7 @@ class GuideLanguage
     public function getLanguagesByGuide($guideId)
     {
         $sql = "SELECT gl.*, l.LangName 
-                FROM guide_languages gl 
+                FROM guidelang gl 
                 JOIN languages l ON gl.LangID = l.LangID 
                 WHERE gl.GuideID = ?";
         
@@ -40,7 +40,7 @@ class GuideLanguage
 
     public function updateVerificationStatus($guideId, $langId, $status)
     {
-        $sql = "UPDATE guide_languages SET VerificationStatus = ? WHERE GuideID = ? AND LangID = ?";
+        $sql = "UPDATE guidelang SET VerificationStatus = ? WHERE GuideID = ? AND LangID = ?";
         $stmt = $this->db->prepare($sql);
         
 
