@@ -40,7 +40,7 @@ class Guid extends User
     /* GET ONE GUIDE */
     public function getGuideById($id)
     {
-        $sql = "SELECT * FROM guides WHERE GuideID = ?";
+        $sql = "SELECT * FROM guide WHERE GuideID = ?";
         $stmt = $this->db->prepare($sql);
 
         $stmt->bind_param("i", $id);
@@ -50,9 +50,9 @@ class Guid extends User
     }
 
     /* GET ALL GUIDES */
-    public function getAllGuides()
+    public function getAllGuide()
     {
-        $sql = "SELECT * FROM guides ORDER BY GuideID DESC";
+        $sql = "SELECT * FROM guide ORDER BY GuideID DESC";
         $result = $this->db->query($sql);
 
         return $result->fetch_all(MYSQLI_ASSOC);
@@ -71,7 +71,7 @@ class Guid extends User
         $cancellationRate,
         $visibilityScore
     ) {
-        $sql = "UPDATE guides 
+        $sql = "UPDATE guide 
             SET IdentityID = ?, localCredScore = ?, yearsOfExperience = ?, isVerified = ?, baseCountry = ?, status = ?, yearsOfResidency = ?, CancellationRate = ?, VisibilityScore = ?
             WHERE GuideID = ?";
 
@@ -97,7 +97,7 @@ class Guid extends User
     /* DELETE GUIDE */
     public function deleteGuide($id)
     {
-        $sql = "DELETE FROM guides WHERE GuideID = ?";
+        $sql = "DELETE FROM guide WHERE GuideID = ?";
         $stmt = $this->db->prepare($sql);
 
         $stmt->bind_param("i", $id);
@@ -107,8 +107,8 @@ class Guid extends User
     /* 13. Update Local Cred Score */
     public function updateLocalCredScore($guideId, $score)
     {
-   
-        $sql = "UPDATE guides SET localCredScore = ? WHERE GuideID = ?";
+
+        $sql = "UPDATE guide SET localCredScore = ? WHERE GuideID = ?";
         $stmt = $this->db->prepare($sql);
         $stmt->bind_param("ii", $score, $guideId);
         return $stmt->execute();
@@ -117,20 +117,20 @@ class Guid extends User
     /* 21. Update Visibility Score */
     public function updateVisibilityScore($guideId, $score)
     {
-      
-        $sql = "UPDATE guides SET VisibilityScore = ? WHERE GuideID = ?";
+
+        $sql = "UPDATE guide SET VisibilityScore = ? WHERE GuideID = ?";
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("ii", $score, $guideId); 
+        $stmt->bind_param("ii", $score, $guideId);
         return $stmt->execute();
     }
 
-  
-public function getIdentityById($guideId)
-{
-    $sql = "SELECT * FROM guides WHERE GuideID = ?";
-    $stmt = $this->db->prepare($sql);
-    $stmt->bind_param("i", $guideId);
-    $stmt->execute();
-    return $stmt->get_result()->fetch_assoc();
-}
+
+    public function getIdentityById($guideId)
+    {
+        $sql = "SELECT * FROM guide WHERE GuideID = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("i", $guideId);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_assoc();
+    }
 }

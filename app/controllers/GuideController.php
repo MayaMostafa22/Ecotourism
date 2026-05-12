@@ -97,7 +97,7 @@ class GuideController
     }
 
     /**
-     * 18. Mobile "In-Field" Profile Updater
+     * 18. Mobile "In-Field" Profile Updater***
      */
     public function storeFieldReport($tourId, $reportContent)
     {
@@ -160,7 +160,7 @@ class GuideController
     }
 
     /**
-     * 21. Performance-Based Visibility Boost
+     * 21. Performance-Based Visibility Boost***
      */
     public function boostVisibility()
     {
